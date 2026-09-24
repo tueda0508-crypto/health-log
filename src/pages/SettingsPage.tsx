@@ -42,10 +42,16 @@ export default function SettingsPage() {
     if (location.hash.includes('backup')) document.getElementById('backup')?.scrollIntoView()
   }, [])
 
+  // 登録前は画面上だけで編集し、「登録」ボタンで保存する。登録後は変更をその場で保存する
   const setP = <K extends keyof Profile>(k: K, v: Profile[K]) => {
     const next = { ...profile, [k]: v }
     setProfile(next)
-    updateSettings({ profile: next })
+    if (s.profile) updateSettings({ profile: next })
+  }
+
+  const onApiKeyChange = (v: string) => {
+    setApiKey(v)
+    updateSettings({ apiKey: v.trim() })
   }
 
   const setOverride = (k: TargetKey, v: string) => {
@@ -108,7 +114,11 @@ export default function SettingsPage() {
             {GOAL_OPTIONS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
           </select>
         </label>
-        {!s.profile && <button className="btn primary block" onClick={() => updateSettings({ profile })}>この内容で登録</button>}
+        {s.profile ? (
+          <p className="muted small">✓ 登録済み。変更は自動で保存されます</p>
+        ) : (
+          <button className="btn primary block" onClick={() => updateSettings({ profile })}>この内容で登録</button>
+        )}
       </section>
 
       <section className="card">
@@ -141,12 +151,16 @@ export default function SettingsPage() {
               value={apiKey}
               placeholder="sk-ant-..."
               autoComplete="off"
-              onChange={(e) => setApiKey(e.target.value)}
-              onBlur={() => updateSettings({ apiKey: apiKey.trim() })}
+              onChange={(e) => onApiKeyChange(e.target.value)}
             />
             <button className="btn small ghost" onClick={() => setShowKey(!showKey)}>{showKey ? '隠す' : '表示'}</button>
           </span>
         </label>
+        {s.apiKey ? (
+          <p className="small">✓ 保存済み{!s.apiKey.startsWith('sk-ant-') && <span className="error">（「sk-ant-」で始まっていません。貼り付け内容を確認してください）</span>}</p>
+        ) : (
+          <p className="muted small">未登録（入力すると自動で保存されます）</p>
+        )}
         <p className="muted small">
           キーはこの端末の中だけに保存され、Anthropic への解析リクエスト以外には送信しません。
           console.anthropic.com で発行し、念のため利用上限（Spend limit）を設定しておくと安心です。
