@@ -1,10 +1,7 @@
 import { useState } from 'react'
+import NumberInput from './NumberInput'
 import { fmt, itemNutrients, NUTRIENT_KEYS, NUTRIENT_LABELS, type FoodItem, type Nutrients } from '../lib/nutrition'
 
-function num(v: string): number {
-  const n = parseFloat(v)
-  return Number.isFinite(n) && n >= 0 ? n : 0
-}
 
 export default function ItemEditor({
   item,
@@ -21,7 +18,9 @@ export default function ItemEditor({
   const n = itemNutrients(item)
 
   // 栄養値を直接直した場合は「今の量あたりの値」として基準を置き換える
+  // （量が0のときは比率が決められないので、量を先に入れてもらう）
   const setNutrient = (key: keyof Nutrients, value: number) => {
+    if (item.amount <= 0) return
     onChange({ ...item, baseAmount: item.amount, base: { ...n, [key]: value } })
   }
 
@@ -38,14 +37,7 @@ export default function ItemEditor({
       </div>
       <div className="item-amount">
         <button className="step" onClick={() => onChange({ ...item, amount: Math.max(0, +(item.amount * 0.8).toFixed(1)) })} aria-label="減らす">−</button>
-        <input
-          type="number"
-          inputMode="decimal"
-          min={0}
-          value={item.amount}
-          onChange={(e) => onChange({ ...item, amount: num(e.target.value) })}
-          aria-label="量"
-        />
+        <NumberInput min={0} value={item.amount} onChange={(v) => onChange({ ...item, amount: v })} aria-label="量" />
         <input className="unit" value={item.unit} onChange={(e) => onChange({ ...item, unit: e.target.value })} aria-label="単位" />
         <button className="step" onClick={() => onChange({ ...item, amount: +(item.amount * 1.25).toFixed(1) })} aria-label="増やす">＋</button>
         <span className="item-kcal">{fmt(n.kcal, 'kcal')} kcal</span>
@@ -62,13 +54,11 @@ export default function ItemEditor({
           {NUTRIENT_KEYS.map((k) => (
             <label key={k}>
               <span>{NUTRIENT_LABELS[k].label}</span>
-              <input
-                type="number"
-                inputMode="decimal"
+              <NumberInput
                 min={0}
                 step="0.1"
                 value={k === 'kcal' ? Math.round(n[k]) : Math.round(n[k] * 10) / 10}
-                onChange={(e) => setNutrient(k, num(e.target.value))}
+                onChange={(v) => setNutrient(k, v)}
               />
               <span className="muted">{NUTRIENT_LABELS[k].unit}</span>
             </label>

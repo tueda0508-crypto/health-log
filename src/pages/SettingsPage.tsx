@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import NumberInput from '../components/NumberInput'
 import {
   ACTIVITY_OPTIONS,
   autoTargets,
@@ -91,15 +92,15 @@ export default function SettingsPage() {
         <div className="form-grid">
           <label className="field">
             <span>年齢</span>
-            <span className="input-unit"><input type="number" inputMode="numeric" value={profile.age} onChange={(e) => setP('age', Number(e.target.value))} /><span className="muted">歳</span></span>
+            <span className="input-unit"><NumberInput inputMode="numeric" value={profile.age} onChange={(v) => setP('age', v)} /><span className="muted">歳</span></span>
           </label>
           <label className="field">
             <span>身長</span>
-            <span className="input-unit"><input type="number" inputMode="decimal" value={profile.height} onChange={(e) => setP('height', Number(e.target.value))} /><span className="muted">cm</span></span>
+            <span className="input-unit"><NumberInput value={profile.height} onChange={(v) => setP('height', v)} /><span className="muted">cm</span></span>
           </label>
           <label className="field">
             <span>体重{recordedWeight != null && <small className="muted">（記録: {recordedWeight}kg を使用）</small>}</span>
-            <span className="input-unit"><input type="number" inputMode="decimal" value={profile.weight} disabled={recordedWeight != null} onChange={(e) => setP('weight', Number(e.target.value))} /><span className="muted">kg</span></span>
+            <span className="input-unit"><NumberInput value={profile.weight} disabled={recordedWeight != null} onChange={(v) => setP('weight', v)} /><span className="muted">kg</span></span>
           </label>
         </div>
         <label className="field">
